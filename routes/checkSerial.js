@@ -1,19 +1,29 @@
-const express = require("express");
-const Sorteo = require("../models/Sorteo");
+/* Imports */
+import axios from 'axios';
+import express from 'express';
+import dotenv from 'dotenv'
+
 const router = express.Router();
+dotenv.config();
 
-// Routes
-router.post("/", (req, res) => {
-    res.json({ serials: [] });
+/* Connection details */
+const API_BASE = process.env.API_BASE;
+
+/* Routes */
+router.get("/:serial", async (req, res) => {
+    const body = {
+        "type": "/ConsultaTiquetesSerial",
+        "parameters": {
+            "ticketSerialNumber": `${req.params.serial}`
+        }
+    };
+
+    axios.post(API_BASE, body)
+        .then((response) => {
+            res.json(response.data);
+        })
+        .catch((e) => { res.send("An error ocurred checking serial: " + e) });
+
 });
 
-router.get("/", async (req, res) => {
-    try {
-        const sorteos = await Sorteo.find();
-        res.json(sorteos);
-    } catch (error) {
-        res.json({ error: 1 });
-    }
-});
-
-module.exports = router;
+export default router;

@@ -1,31 +1,39 @@
-const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
-const axios = require("axios");
-const cors = require("cors");
-require("dotenv").config();
+/* Imports */
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
-const API_BASE = process.env.API_BASE;
+
+/* Connection details */
 const PORT = process.env.PORT || 3000;
+dotenv.config()
 
-async function connectDB() {
-    try {
-        await mongoose.connect(process.env.DB_LOCAL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log("DB is connected");
-    } catch (error) {
-        console.error(error);
-    }
-}
+const app = express();
 
+/* Middlewares */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 
-const checkSerial = require("./routes/checkSerial");
+/* Routes */
+import checkSerial from './routes/checkSerial.js';
+import createSorteo from './routes/createSorteo.js';
+
 app.use("/checkSerial", checkSerial);
+app.use("/createSorteo", createSorteo);
+
+import Sorteo from './models/Sorteo.js';
+import fetchSaveSorteos from './services/fetchSaveSorteos.js'
+
+/* Database connection */
+mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(async () => {
+        console.log("MongoDB is connected")
+        let count = await Sorteo.collection.countDocuments()
+        //fetchSaveSorteos(count !== 0 ? 1 : 0)
+    })
+    .catch((e) => console.log("An error occurred connecting to MongoDB \n" + e));
 
 app.get("/", (req, res) => {
     res.json({ message: "Welcome bro, you are the best!" });
@@ -34,4 +42,11 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`El servidor está inicializado en el puerto ${PORT}`);
 });
-connectDB();
+
+process.on('SIGINT', () => {
+    console.log('Closing connection...');
+    mongoose.disconnect().then(() => {
+        console.log(`Connection is closed. State is: ${mongoose.connection.readyState}`)
+        process.exit(0);
+    });
+});
