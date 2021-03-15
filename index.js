@@ -1,9 +1,15 @@
-/* Imports */
+/* General imports */
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 
+/* Route imports */
+import checkSerial from './routes/check-serial.js';
+import fetchSaveSorteos from './services/fetchSaveSorteos.js'
+
+/* Schema imports */
+import Sorteo from './models/Sorteo.js';
 
 /* Connection details */
 const PORT = process.env.PORT || 3000;
@@ -17,21 +23,15 @@ app.use(express.json());
 app.use(cors());
 
 /* Routes */
-import checkSerial from './routes/checkSerial.js';
-import createSorteo from './routes/createSorteo.js';
-
 app.use("/checkSerial", checkSerial);
-app.use("/createSorteo", createSorteo);
-
-import Sorteo from './models/Sorteo.js';
-import fetchSaveSorteos from './services/fetchSaveSorteos.js'
 
 /* Database connection */
-mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.DB_LOCAL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(async () => {
         console.log("MongoDB is connected")
         let count = await Sorteo.collection.countDocuments()
-        //fetchSaveSorteos(count !== 0 ? 1 : 0)
+        /* Add PC, fetch sorteos between last month and time.now() month and insert into db the ones which PC <= id */
+        fetchSaveSorteos(count !== 0 ? 1 : 0)
     })
     .catch((e) => console.log("An error occurred connecting to MongoDB \n" + e));
 
