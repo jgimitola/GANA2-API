@@ -6,24 +6,28 @@ import dotenv from 'dotenv'
 const router = express.Router();
 dotenv.config();
 
-/* Connection details */
 const API_BASE = process.env.API_BASE;
 
-/* Routes */
-router.get("/:serial", async (req, res) => {
-    const body = {
-        "type": "/ConsultaTiquetesSerial",
-        "parameters": {
-            "ticketSerialNumber": `${req.params.serial}`
-        }
-    };
+router.get("/:serial", (req, res) => {
+    let regexp = /^\d{4}-\d{9}-\d{6}$/gm;
+    let serial = req.params.serial;
 
-    axios.post(API_BASE, body)
-        .then((response) => {
-            res.json(response.data);
-        })
-        .catch((e) => { res.send("An error ocurred checking serial: " + e) });
+    if (regexp.test(serial)) {
+        const body = {
+            "type": "/ConsultaTiquetesSerial",
+            "parameters": {
+                "ticketSerialNumber": `${serial}`
+            }
+        };
 
+        axios.post(API_BASE, body)
+            .then((response) => {
+                res.json(response.data);
+            })
+            .catch((error) => { res.json({ message: "An error ocurred checking serial", error }); });
+    } else {
+        res.json({ message: "Bad serial", error: "BAD_SERIAL_FORMAT" });
+    }
 });
 
 export default router;

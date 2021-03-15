@@ -1,5 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import SorteoCounter from '../services/SorteoCounter.js'
 dotenv.config()
 
 import Sorteo from '../models/Sorteo.js'
@@ -99,6 +100,8 @@ let fetchSaveSorteos = (sorteosCount) => {
                 };
                 parsedSorteos.push(sorteo);
             }
+
+            SorteoCounter.SC = parsedSorteos[0].id;
 
             Sorteo.collection.insertMany(parsedSorteos)
                 .then(() => { console.log("Sorteo/s have been saved.") })
