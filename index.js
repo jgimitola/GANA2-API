@@ -3,16 +3,16 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import cron from 'node-cron';
 
 /* Route imports */
 import checkSerial from './routes/check-serial.js';
-import lastSorteo from './routes/last-sorteo.js'
-import sorteos from './routes/sorteos.js'
+import lastSorteo from './routes/last-sorteo.js';
+import sorteos from './routes/sorteos.js';
 
 /* Service imports */
-import SorteoCounter from './services/SorteoCounter.js'
-import fetchLastId from './services/fetchLastId.js'
-import fetchSaveSorteos from './services/fetchSaveSorteos.js'
+import fetchSaveSorteos from './services/fetchSaveSorteos.js';
+import updateDb from './services/updateDB.js';
 
 /* Schema imports */
 import Sorteo from './models/Sorteo.js';
@@ -42,25 +42,21 @@ mongoose.connect(process.env.DB_LOCAL, { useNewUrlParser: true, useUnifiedTopolo
             console.log("DB is empty, filling it out...")
             fetchSaveSorteos(0);
         } else {
-            const latestInDB = await Sorteo.findOne({}).sort({ id: -1 });
-            const lastIdOrgAPI = await fetchLastId();
-            if (latestInDB.id !== lastIdOrgAPI) {
-                console.log("Loading sorteos....");
-                fetchSaveSorteos(lastIdOrgAPI - latestInDB);
-            } else {
-                console.log("DB is up to date");
-                SorteoCounter.SC = latestInDB.id;
-            }
+            updateDb();
         }
     })
     .catch((e) => console.log("An error occurred connecting to MongoDB \n" + e));
+
+cron.schedule('0 15 5 * * Thursday,Sunday', async () => {
+    await updateDb();
+});
 
 app.get("/", (req, res) => {
     res.json({ message: "Welcome bro, you are the best!" });
 });
 
 app.listen(PORT, () => {
-    console.log(`El servidor está inicializado en el puerto ${PORT}`);
+    console.log(`Server listening at port: ${PORT}`);
 });
 
 process.on('SIGINT', () => {

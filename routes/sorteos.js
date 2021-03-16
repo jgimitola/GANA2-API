@@ -3,10 +3,11 @@ import Sorteo from '../models/Sorteo.js'
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-    // This is so slow.
-    const sorteos = await Sorteo.find({});
-    res.json(sorteos);
+router.get('/', (req, res) => {
+    Sorteo.find({}).sort({ id: -1 }).lean()
+        .then((sorteos) => {
+            res.json(sorteos);
+        });
 });
 
 export default router;
