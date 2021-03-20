@@ -9,7 +9,7 @@ let updateDb = async () => {
     const lastIdOrgAPI = await fetchLastId();
     if (latestInDB.id !== lastIdOrgAPI) {
         console.log("Loading sorteos...");
-        fetchSaveSorteos(lastIdOrgAPI - latestInDB);
+        fetchSaveSorteos(lastIdOrgAPI - latestInDB.id);
     } else {
         console.log("DB is up to date");
         SorteoCounter.SC = latestInDB.id;
