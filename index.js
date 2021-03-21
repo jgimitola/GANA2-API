@@ -37,7 +37,7 @@ app.use("/sorteos", sorteos);
 mongoose.connect(process.env.DB_LOCAL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(async () => {
         console.log("MongoDB is connected")
-        let count = await Sorteo.collection.countDocuments();
+        let count = await Sorteo.collection.estimatedDocumentCount();
         if (count === 0) {
             console.log("DB is empty, filling it out...")
             fetchSaveSorteos(0);
