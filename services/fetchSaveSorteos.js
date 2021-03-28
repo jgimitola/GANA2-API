@@ -1,12 +1,18 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import SorteoCounter from '../services/SorteoCounter.js'
+import Sorteo from '../models/Sorteo.js'
 dotenv.config()
 
-import Sorteo from '../models/Sorteo.js'
+const API_BASE = process.env.API_BASE; // base API url.
 
-const API_BASE = process.env.API_BASE;
-
+/**
+ * This function fetch an specified amount of sorteo's from the
+ * base API, it compares the id with SorteoCounter and stores the new
+ * documents to the database.
+ * 
+ * @param {number} sorteosCount  - Amount of sorteos to be fetched.
+ */
 let fetchSaveSorteos = (sorteosCount) => {
     const body = {
         "type": "/LastGameResult",
@@ -21,13 +27,13 @@ let fetchSaveSorteos = (sorteosCount) => {
         .then((response) => {
             let parsedSorteos = [];
             for (const res of response.data) {
-                if (res.id > SorteoCounter.SC) {
+                if (res.id > SorteoCounter.SC) { // Check if id is new.
                     const sorteo = {
                         id: res.id,
                         sorteo: res.sorteo,
                         date: res.date,
-                        stock: [res.baloto_acumulado / 1000000, res.revancha_acumulado / 1000000],
-                        cityWinner: [(res.baloto_ciudad === "") ? null : res.baloto_ciudad, (res.revancha_ciudad === "") ? null : res.revancha_ciudad],
+                        stock: [res.baloto_acumulado, res.revancha_acumulado].map((x) => x / 1000000),
+                        cityWinner: [(!res.baloto_ciudad) ? null : res.baloto_ciudad, (!res.revancha_ciudad) ? null : res.revancha_ciudad],
                         ballsBaloto: [res.baloto1, res.baloto2, res.baloto3, res.baloto4, res.baloto5, res.baloto6],
                         ballsRevancha: [res.revancha1, res.revancha2, res.revancha3, res.revancha4, res.revancha5, res.revancha6],
                         winnersBaloto: {
@@ -98,7 +104,7 @@ let fetchSaveSorteos = (sorteosCount) => {
                                 cash: res.revancha_ganadores1_valor
                             }
                         }
-                    };
+                    }; // Parse to Schema's format.
                     parsedSorteos.push(sorteo);
                 }
             }

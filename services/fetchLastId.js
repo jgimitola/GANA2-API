@@ -2,8 +2,13 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config()
 
-const API_BASE = process.env.API_BASE;
+const API_BASE = process.env.API_BASE; // base API url.
 
+/**
+ * This function fetch the latest Ild in the base API.
+ * 
+ * @returns {number} Latest Id in base API.
+ */
 let fetchLastId = async () => {
     const body = {
         "type": "/LastGameResult",

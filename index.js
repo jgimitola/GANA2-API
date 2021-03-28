@@ -26,7 +26,7 @@ const app = express();
 /* Middlewares */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors()); // We haven't used it yet.
 
 /* Routes */
 app.use("/check-serial", checkSerial);
@@ -47,8 +47,11 @@ mongoose.connect(process.env.DB_LOCAL, { useNewUrlParser: true, useUnifiedTopolo
     })
     .catch((e) => console.log("An error occurred connecting to MongoDB \n" + e));
 
+/* Setting a task to update automatically the DB */
 cron.schedule('0 15 5 * * Thursday,Sunday', async () => {
     await updateDb();
+}, {
+    timezone: 'America/Bogota' //To avoid problems if the API is hosted is in other timezone.
 });
 
 app.get("/", (req, res) => {
@@ -59,6 +62,7 @@ app.listen(PORT, () => {
     console.log(`Server listening at port: ${PORT}`);
 });
 
+/* Close connection with DB when CTRL - C is used */
 process.on('SIGINT', () => {
     console.log('Closing connection...');
     mongoose.disconnect().then(() => {
