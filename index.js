@@ -51,7 +51,7 @@ mongoose.connect(process.env.DB_LOCAL, { useNewUrlParser: true, useUnifiedTopolo
 cron.schedule('0 15 5 * * Thursday,Sunday', async () => {
     await updateDb();
 }, {
-    timezone: 'America/Bogota' //To avoid problems if the API is hosted is in other timezone.
+    timezone: 'America/Bogota' //To avoid problems if the API is hosted in other timezone.
 });
 
 app.get("/", (req, res) => {
