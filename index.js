@@ -34,7 +34,7 @@ app.use("/last-sorteo", lastSorteo);
 app.use("/sorteos", sorteos);
 
 /* Database connection */
-mongoose.connect(process.env.DB_LOCAL, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(async () => {
         console.log("MongoDB is connected")
         let count = await Sorteo.collection.estimatedDocumentCount();
