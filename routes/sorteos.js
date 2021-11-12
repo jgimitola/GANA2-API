@@ -27,4 +27,22 @@ router.get('/', async (req, res) => {
         });
 });
 
+
+/**
+ * This route receives a sorteo param an returns the corresponding sorteo.
+ */
+router.get('/:sorteo', async (req, res) => {
+    let sorteo = parseInt(req.params.sorteo);
+
+    Sorteo.find({ sorteo }).then(sorteos => {
+        if (sorteos.length > 0) {
+            res.json(sorteos[0]);            
+        } else {            
+            res.status(404).json({ message: `Sorteo with number ${sorteo}, was not found`});
+        }
+    }).catch((error) => {
+        res.status(500).json({ message: `Couldn't get sorteo's number ${sorteo}`, error })
+    })
+});
+
 export default router;
